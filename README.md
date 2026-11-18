@@ -1,54 +1,15 @@
 # tiny-chess-4k
 
-A compact chess engine for the tiny-chess-01 gauntlet. It talks to the match
-server through `MAKEFUN_ENV_URL`, asks for a game, plays one legal move at a
-time, and stops when the server reports that the trial is done.
+[![make.fun · tiny-chess-01](https://make.fun/badge/tiny-chess-01.svg)](https://make.fun/bounty/tiny-chess-01?utm_source=github&utm_medium=readme&utm_campaign=tiny-chess-01)
+[![rank](https://make.fun/badge/tiny-chess-01/yiyi218218-crypto/tiny-chess-4k/rank.svg)](https://make.fun/bounty/tiny-chess-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=tiny-chess-01)
+[![reward](https://make.fun/badge/tiny-chess-01/yiyi218218-crypto/tiny-chess-4k/reward.svg)](https://make.fun/bounty/tiny-chess-01?utm_source=github&utm_medium=readme&utm_campaign=tiny-chess-01)
 
-## What is inside
+A compact chess engine for the [tiny-chess-01](https://make.fun/bounty/tiny-chess-01) gauntlet. It polls `MAKEFUN_ENV_URL`, plays one legal move per turn and exits when the trial ends.
 
-The position lives in a ten-wide mailbox. Rows two through nine hold the board
-and a sentinel ring surrounds it, so a knight or king step can never wander off
-the edge and a sliding piece stops by itself. White men occupy codes two to
-seven, black men the same codes eight higher; taking a code modulo eight gives
-the piece kind, and one comparison gives its colour.
-
-Scores come from material plus two sets of piece-square tables. A phase counter
-weights a knight or bishop as one, a rook as two and a queen as four, and the
-tables are mixed accordingly across the twenty-four points of material in the
-starting position. The tables themselves are stored as a single string of
-characters, twelve blocks of sixty-four, at eight-centipawn resolution.
-
-The search deepens one ply at a time and stops after a fixed number of nodes,
-never on the wall clock, so a position always receives a repeatable amount of
-work. A hash table holds earlier results with bound types and depths; null
-moves, late move reductions and a capture-only quiescence prune the tree. At the
-root the previous best move is tried first, then captures, with a narrow window
-for every later move. Killers, history scores and most-valuable-victim ordering
-decide the rest.
-
-Legality is handled by making the move and looking at the mover's king, then
-taking the move back if that king is still attacked. Running out of moves is
-mate when in check and a draw otherwise — a stalemate must not be mistaken for
-a win. A hash list of the game so far turns a third repetition into a draw.
-Should the chosen move ever be rejected, the engine falls back to the first
-move the server offered rather than crashing the whole trial.
-
-## Build and run
-
-`main.py` is the packed entrypoint, produced from a source file that is kept
-out of the repository.
+The board is a ten-wide mailbox with a sentinel ring; white men are codes two to seven, black men the same codes eight higher. Scores are material plus middlegame and endgame piece-square tables, mixed by a phase count, from a 768-character packed blob. Search is iterative-deepening alpha-beta with a transposition table, null moves, late-move reductions, a capture-only quiescence and a fixed node budget. Killers, history and MVV-LVA order the moves; the mover's king is tested after each move, stalemate scores a draw and a third repetition scores zero.
 
 ```sh
 MAKEFUN_ENV_URL=http://127.0.0.1:8080 python main.py
 ```
 
-## Checking the work
-
-The source was compared with a known-good build on fixed positions at several
-node budgets, checking both the move and the node count. Practice trials run
-the packed entry against the house opponents and report score and think time.
-
-A first practice trial scored two wins and four losses, worth roughly 1,099
-Elo, with 121 plies spared in the wins and a slowest move of about 5.6 seconds
-against a ten-second allowance. The packed entry is exactly 4,096 bytes; the
-source stays untracked and travels with the session record.
+`main.py` is the packed entry; its readable source is not committed. One trial scored two wins and four losses (~1,099 Elo), with a slowest move of 5.6 seconds against the ten-second allowance.
