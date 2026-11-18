@@ -18,20 +18,24 @@ Evaluation is material plus piece-square tables, middlegame and endgame, blended
 by a phase count of the non-pawn material still on the board: knights and bishops
 one, rooks two, queens four, twenty-four at the start. A pawn on its seventh rank
 is worth a hundred and seventy-eight more in the endgame than in the middle, which
-is what turns a blocked passer into a reason to push it.
+is what turns a blocked passer into a reason to push it. The twelve tables are
+packed as one character a square at eight-centipawn steps.
 
-Search is iterative deepening alpha-beta with a transposition table, null-move
-pruning at depth three and up, late move reductions that grow with the move index,
-a quiescence search that searches every evasion when the side to move is in check,
-killers, history, and MVV-LVA ordering. Moves are only re-tested for legality when
-the king moves, when the piece is pinned, or when the move is en passant; a single
-ray scan per node finds the pins.
+Search is iterative deepening alpha-beta with a transposition table, a principal
+variation split at the root, null-move pruning at depth three and up, a late move
+reduction that grows with the move index, a quiescence search that searches every
+evasion when the side to move is in check, killers, history, and MVV-LVA ordering.
+Every move is made and the mover's own king then tested for attack, so a move that
+leaves it in check is taken back rather than filtered out beforehand. A side with
+no legal move left is mated when its king is in check and otherwise stalemated,
+and a stalemate is scored a draw: without that the search reads a stalemate as a
+mate it has found and steers into one with a queen on the board.
 
-Two details keep a trial reproducible. The search is bounded by a node count and
-never by a clock, so the same position always spends the same effort; and the game
-so far is replayed into a list of position hashes, so a move that would repeat a
-position for the third time is scored as a draw rather than as a win it cannot
-reach.
+Two details keep a trial reproducible. The search is bounded by ninety thousand
+nodes a move and never by a clock, so the same position always spends the same
+effort; and the game so far is replayed into a list of position hashes, so a move
+that would repeat a position for the third time is scored as a draw rather than as
+a win it cannot reach.
 
 ## Run it
 
