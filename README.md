@@ -31,7 +31,7 @@ no legal move left is mated when its king is in check and otherwise stalemated,
 and a stalemate is scored a draw: without that the search reads a stalemate as a
 mate it has found and steers into one with a queen on the board.
 
-Two details keep a trial reproducible. The search is bounded by ninety thousand
+Two details keep a trial reproducible. The search is bounded by seventy thousand
 nodes a move and never by a clock, so the same position always spends the same
 effort; and the game so far is replayed into a list of position hashes, so a move
 that would repeat a position for the third time is scored as a draw rather than as
